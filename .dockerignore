@@ -1,0 +1,28 @@
+# Entornos virtuales
+venv_p/
+venv/
+env/
+.venv/
+
+# Caché y archivos temporales
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+
+# GIT
+.git/
+
+# BLOQUEO DE DATOS PESADOS 
+# No copies los PDFs ni la base de datos a la imagen.
+data/
+docs/
+Archivos/
+
+# Modelos locales descargados (si HuggingFace guardó algo aquí)
+.cache/
+models/
+huggingface/
+
+# Variables y configs locales
+.env

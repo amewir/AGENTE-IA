@@ -1,0 +1,32 @@
+# Entornos virtuales
+.venv/
+venv/
+env/
+.venv_p/
+# Variables sensibles
+#.env
+
+# Base de datos y datos crudos
+data/vector_db/
+data/raw/*
+!data/raw/.gitkeep
+data/Docs/*
+# Python cache
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store
+
+
+# Logs
+*.log
+
+
+
+data/
+models/
+*.bin
+*.pt
+*.db
+.env

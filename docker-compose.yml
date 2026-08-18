@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # BACKEND
+  gae-bot:
+    build: .
+    container_name: gae_api_service
+    ports:
+      - "8000:8000"
+    env_file: .env  # Carga automática
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+      - ./api:/app/api
+    depends_on:
+      - ollama
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G
+
+  # -MOTOR IA: OLLAMA 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: gae_ollama_engine
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_storage:/root/.ollama
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 4.5G  # Espacio suficiente para gemma3:4b
+
+volumes:
+  ollama_storage:

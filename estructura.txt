@@ -1,0 +1,25 @@
+Agente_IA_GAE/
+│
+├── data/
+│   ├── raw/                 # Aquí caerán los PDFs y DOCX crudos
+│   └── vector_db/           # Aquí se autogenerará ChromaDB
+│
+├── src/                     # El motor lógico y de IA
+│   ├── __init__.py
+│   ├── config.py               #Configuracion del proyecto
+│   ├── pipeline_datos.py      # ingesta masiva de documentos
+│   ├── tools/               # herramientas del Agente
+│   │   ├── __init__.py
+│   │   ├── 
+│   │   ├── buscador_rag.py  # lógica de búsqueda en Chroma
+│   │   └── api_conexion.py   # Para futuras consultas a la plataforma
+│   └── agente.py            # LangGraph: El cerebro orquestador
+│
+├── api/                     # La capa de comunicación
+│   ├── __init__.py
+│   └── main.py              # FastAPI:  endpoints (/chat/principal, etc.)
+│
+├── .env                     # Variables secretas CUIDADO!!!!!!!!!!!!!!!!!!!!!!!!!!
+├── requirements.txt         # Lista estricta de dependencias
+├── Dockerfile               # Instrucciones para contenerizar el proyecto luego
+└── README.md                # Documentación institucional del proyecto

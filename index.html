@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agente IA - GAE</title>
+    <style>
+        :root {
+            --bg-main: #f5f5f7; /* Gris claro premium de Apple */
+            --bg-card: #ffffff;
+            --border-color: #d2d2d7;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --primary-blue: #003366; /* Azul institucional GAE */
+            --accent-cyan: #0066cc; /* Azul interactivo */
+            --retro-mono: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Contenedor Principal */
+        #chat-container {
+            width: 90%;
+            max-width: 680px;
+            height: 82vh;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Encabezado */
+        header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fafafa;
+        }
+        
+        header h3 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background-color: #34c759; /*  Apple */
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .system-status {
+            font-family: var(--retro-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            letter-spacing: 0.05em;
+        }
+
+        /* Zona de Respuestas*/
+        #responses {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background-color: #ffffff;
+        }
+
+        /* Burbujas  */
+        .bubble {
+            max-width: 82%;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .bubble-sender {
+            font-family: var(--retro-mono);
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.03em;
+            padding-left: 2px;
+        }
+
+        .user .bubble-sender {
+            align-self: flex-end;
+            padding-right: 2px;
+        }
+
+        .bubble-text {
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 12px 18px;
+            border-radius: 14px;
+        }
+
+        .user {
+            align-self: flex-end;
+        }
+
+        .user .bubble-text {
+            background: var(--primary-blue);
+            color: white;
+            border-top-right-radius: 4px;
+        }
+
+        .ai {
+            align-self: flex-start;
+        }
+
+        .ai .bubble-text {
+            background: var(--bg-main);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-top-left-radius: 4px;
+        }
+
+        /* Formateo interno para respuestas RAG (listas de leyes) */
+        .bubble-text ul {
+            margin-top: 6px;
+            padding-left: 18px;
+        }
+
+        .bubble-text li {
+            margin-bottom: 4px;
+        }
+
+        /* Área de Entrada de Datos */
+        .input-area {
+            display: flex;
+            gap: 12px;
+            padding: 16px 24px 20px 24px;
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            align-items: center;
+        }
+
+        .input-wrapper {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            transition: all 0.15s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.12);
+        }
+
+        input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 12px 18px;
+            font-size: 14px;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        input::placeholder {
+            color: var(--text-secondary);
+        }
+        
+        button {
+            background: var(--text-primary);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background-color 0.1s ease;
+        }
+        
+        button:hover {
+            background: var(--accent-cyan);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        
+        .system-footer {
+            text-align: center;
+            font-family: var(--retro-mono);
+            font-size: 9px;
+            color: var(--text-secondary);
+            padding-bottom: 10px;
+            background-color: #ffffff;
+            letter-spacing: 0.03em;
+        }
+    </style>
+</head>
+<body>
+
+<div id="chat-container">
+    <header>
+        <h3><span class="status-dot"></span> Agente Consultor GAE</h3>
+        <div class="system-status" id="sys-monitor">SYS_CORE // READY</div>
+    </header>
+    
+    <div id="responses">
+        <div class="bubble ai">
+            <span class="bubble-sender">SYSTEM_INIT</span>
+            <div class="bubble-text">Núcleo local inicializado correctamente. Conexión establecida con la base de conocimiento de la GAE. ¿Qué normativa o trámite deseas consultar hoy?</div>
+        </div>
+    </div>
+    
+    <div class="input-area">
+        <div class="input-wrapper">
+            <input type="text" id="pregunta" placeholder="Escribe tu consulta institucional..." autocomplete="off">
+        </div>
+        <button onclick="consultarIA()">Enviar</button>
+    </div>
+
+    <div class="system-footer">
+        NÚCLEO DE INTELIGENCIA LOCAL // REGLA DE DATOS PROTEGIDA
+    </div>
+</div>
+
+<script>
+// Escuchar la tecla Enter en el input
+document.getElementById('pregunta').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        consultarIA();
+    }
+});
+
+async function consultarIA() {
+    const input = document.getElementById('pregunta');
+    const resBox = document.getElementById('responses');
+    const monitor = document.getElementById('sys-monitor');
+    const msg = input.value.trim();
+    
+    if (!msg) return;
+
+    // Agregar burbuja limpia del usuario
+    agregarBurbuja(msg, 'user', 'CIUDADANO');
+    input.value = '';
+    
+    // Mostrar indicador de procesamiento estilo consola
+    monitor.innerText = "SYS_PROCESING // RAG_SEARCH";
+    const typingIndicator = document.createElement("div");
+    typingIndicator.className = "bubble ai";
+    const typingId = 'loading-' + Date.now();
+    typingIndicator.id = typingId;
+    typingIndicator.innerHTML = `
+        <span class="bubble-sender">SYS_RAG</span>
+        <div class="bubble-text"><i>Buscando vectores y procesando consulta...</i></div>
+    `;
+    resBox.appendChild(typingIndicator);
+    resBox.scrollTop = resBox.scrollHeight;
+
+    try {
+        // Ejecución del fetch respetando tus variables de backend exactas
+        const response = await fetch('http://localhost:8000/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg }) // Clave exacta de tu backend
+        });
+
+        const data = await response.json();
+        
+        // Destruir indicador de carga
+        document.getElementById(typingId).remove();
+        
+        // Actualizar monitor del sistema con el origen del dato (rag / static)
+        monitor.innerText = `SYS_CORE // SRC:${data.source.toUpperCase()}`;
+        
+        // Formatear texto si la respuesta trae viñetas de Markdown (*) para no romper las listas RAG
+        const textoFormateado = formatearRespuesta(data.response);
+        
+        // Insertar respuesta limpia de la IA
+        agregarBurbuja(textoFormateado, 'ai', `IA_${data.source.toUpperCase()}`);
+        
+    } catch (err) {
+        document.getElementById(typingId).remove();
+        monitor.innerText = "SYS_CORE // LINK_ERROR";
+        agregarBurbuja('<span style="color:#ff3b30;">Error crítico: No se logró comunicación con el núcleo local en el puerto 8000.</span>', 'ai', 'SYS_FAIL');
+    }
+    resBox.scrollTop = resBox.scrollHeight;
+}
+
+function agregarBurbuja(texto, clase, tag) {
+    const resBox = document.getElementById('responses');
+    const div = document.createElement("div");
+    div.className = `bubble ${clase}`;
+    div.innerHTML = `
+        <span class="bubble-sender">${tag}</span>
+        <div class="bubble-text">${texto}</div>
+    `;
+    resBox.appendChild(div);
+}
+
+
+function formatearRespuesta(texto) {
+    if (!texto) return "";
+    //convertir a negrilla lo que esta entre ** **
+    texto = texto.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    if (texto.includes('*')) {
+        const lineas = texto.split('\n');
+        let html = '';
+        let enLista = false;
+
+        lineas.forEach(linea => {
+            if (linea.trim().startsWith('*')) {
+                if (!enLista) { html += '<ul>'; enLista = true; }
+                html += `<li>${linea.replace('*', '').trim()}</li>`;
+            } else {
+                if (enLista) { html += '</ul>'; enLista = false; }
+                html += linea + '<br>';
+            }
+        });
+        if (enLista) html += '</ul>';
+        return html;
+    }
+    return texto.replace(/\n/g, '<br>');
+}
+</script>
+</body>
+</html>
